@@ -61,6 +61,7 @@ func runObserver(data []string) {
 		floatOut, _ := strconv.ParseFloat(dataFromJson.Price, 42)
 		floatUser, _ := strconv.ParseFloat(data[2], 42)
 
+		//if data[1] ==
 		if floatOut >= floatUser {
 			send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
 
