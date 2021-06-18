@@ -29,7 +29,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func runObserver(data []string) {
-
 	fmt.Println(data)
 	fmt.Println(fmt.Sprintf("wss://stream.binance.com/ws/%s@trade", data[0]))
 
