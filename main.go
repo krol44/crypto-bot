@@ -70,6 +70,7 @@ var channel chan []byte = make(chan []byte, 100000)
 var quantityInsert = 0
 
 func insertClick() {
+
 	connect, err := sql.Open("clickhouse", "xxxxxxxx")
 	connect.SetMaxOpenConns(50)
 	if err != nil {
@@ -115,7 +116,7 @@ func insertClick() {
 		json.Unmarshal(message, &dataFromJson)
 
 		price, _ := strconv.ParseFloat(dataFromJson.Price, 32)
-		quality, _ := strconv.ParseFloat(dataFromJson.Price, 32)
+		quality, _ := strconv.ParseFloat(dataFromJson.Quality, 32)
 		//log.Debugf("%+v", dataFromJson)
 
 		if _, err := stmt.Exec(
@@ -151,10 +152,16 @@ func insertClick() {
 }
 
 func main() {
+	//getClick()
+	//
+	//return
+
 	utils.Test()
 
-	//http.HandleFunc("/", handler)
-	//log.Fatal(http.ListenAndServe(":3434", nil))
+	go func() {
+		http.HandleFunc("/", handler)
+		log.Fatal(http.ListenAndServe(":3434", nil))
+	}()
 
 	go func() {
 		for {
@@ -226,58 +233,75 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func runObserver(data []string) {
 
 	fmt.Println(data)
-	fmt.Println(fmt.Sprintf("wss://stream.binance.com/ws/%s@trade", data[0]))
 
-	conn, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("wss://stream.binance.com/ws/%s@trade", data[0]), nil)
+	//fmt.Printf("%s", message)
 
-	//fmt.Println(conn)
-	//fmt.Println(res)
-	fmt.Println(err)
+	//var dataFromJson ResultJson
+	//
+	//json.Unmarshal(message, &dataFromJson)
 
-	type ResultJson struct {
-		Price string `json:"p"`
-	}
+	//fmt.Println(dataFromJson.Price)
 
-	for {
-		_, message, readErr := conn.ReadMessage()
-		if readErr != nil {
-			fmt.Println(readErr)
-			return
-		}
-
-		//fmt.Printf("%s", message)
-
-		var dataFromJson ResultJson
-
-		json.Unmarshal(message, &dataFromJson)
-
-		//fmt.Println(dataFromJson.Price)
-
-		floatOut, _ := strconv.ParseFloat(dataFromJson.Price, 42)
-		floatUser, _ := strconv.ParseFloat(data[2], 42)
-
-		if data[1] == "up" {
-			if floatOut >= floatUser {
-				send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
-
-				fmt.Println("send")
-				return
-			}
-		} else if data[1] == "down" {
-			if floatOut <= floatUser {
-				send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
-
-				fmt.Println("send")
-				return
-			}
-		}
-
-		fmt.Print(".")
-	}
+	//floatOut, _ := strconv.ParseFloat(dataFromJson.Price, 42)
+	//floatUser, _ := strconv.ParseFloat(data[2], 42)
+	//
+	//if data[1] == "up" {
+	//	if floatOut >= floatUser {
+	//		send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
+	//
+	//		fmt.Println("send")
+	//		return
+	//	}
+	//} else if data[1] == "down" {
+	//	if floatOut <= floatUser {
+	//		send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
+	//
+	//		fmt.Println("send")
+	//		return
+	//	}
+	//}
 }
 
-func errorLog(errorInfo error) {
-	if errorInfo != nil {
-		fmt.Println(errorInfo)
+func getClick() {
+	connect, err := sql.Open("clickhouse", "xxxxxxxx")
+	connect.SetMaxOpenConns(50)
+	if err != nil {
+		log.Error(err)
 	}
+	if err := connect.Ping(); err != nil {
+		if exception, ok := err.(*clickhouse.Exception); ok {
+			fmt.Printf("[%d] %s \n%s\n", exception.Code, exception.Message, exception.StackTrace)
+		} else {
+			log.Error(err)
+		}
+		return
+	}
+
+	rows, err := connect.Query("SELECT country_code, os_id, browser_id, categories, action_day, action_time FROM example")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			country               string
+			os, browser           uint8
+			categories            []int16
+			actionDay, actionTime time.Time
+		)
+		if err := rows.Scan(&country, &os, &browser, &categories, &actionDay, &actionTime); err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("country: %s, os: %d, browser: %d, categories: %v, action_day: %s, action_time: %s", country, os, browser, categories, actionDay, actionTime)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	if _, err := connect.Exec("DROP TABLE example"); err != nil {
+		log.Fatal(err)
+	}
+
 }
