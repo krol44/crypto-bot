@@ -165,7 +165,7 @@ func main() {
 			qc := len(channel)
 			if qc > 10000 {
 				fmt.Print("\n")
-				log.Printf("queue: %v", qc)
+				log.Info("queue: ", qc)
 			}
 
 			time.Sleep(5 * time.Second)
@@ -176,7 +176,7 @@ func main() {
 	go func() {
 		for {
 
-			log.Info("quantity insert: %v", quantityInsert)
+			log.Info("quantity insert: ", quantityInsert)
 
 			quantityInsert = 0
 
