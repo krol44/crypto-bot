@@ -267,7 +267,7 @@ func runObserver(data []string) {
 
 			floatUser, _ := strconv.ParseFloat(data[2], 42)
 
-			log.Printf("date_add: %s, price: %d, find price: %d, symbol: %s, chat id: %s", dateAdd, floatOut, floatUser, data[0], data[3])
+			//log.Printf("date_add: %s, price: %d, find price: %d, symbol: %s, chat id: %s", dateAdd, floatOut, floatUser, data[0], data[3])
 
 			if data[1] == "up" {
 				if floatOut >= floatUser {
