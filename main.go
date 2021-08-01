@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -152,10 +153,6 @@ func insertClick() {
 }
 
 func main() {
-	//getClick()
-	//
-	//return
-
 	utils.Test()
 
 	go func() {
@@ -179,7 +176,7 @@ func main() {
 	go func() {
 		for {
 
-			log.Printf("quantity insert: %v", quantityInsert)
+			log.Info("quantity insert: %v", quantityInsert)
 
 			quantityInsert = 0
 
@@ -227,42 +224,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	go runObserver(stringSlice)
 
-	fmt.Fprintf(w, "ok")
+	log.Info(w, "ok")
 }
 
 func runObserver(data []string) {
 
-	fmt.Println(data)
+	log.Info(data)
 
-	//fmt.Printf("%s", message)
-
-	//var dataFromJson ResultJson
-	//
-	//json.Unmarshal(message, &dataFromJson)
-
-	//fmt.Println(dataFromJson.Price)
-
-	//floatOut, _ := strconv.ParseFloat(dataFromJson.Price, 42)
-	//floatUser, _ := strconv.ParseFloat(data[2], 42)
-	//
-	//if data[1] == "up" {
-	//	if floatOut >= floatUser {
-	//		send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
-	//
-	//		fmt.Println("send")
-	//		return
-	//	}
-	//} else if data[1] == "down" {
-	//	if floatOut <= floatUser {
-	//		send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
-	//
-	//		fmt.Println("send")
-	//		return
-	//	}
-	//}
-}
-
-func getClick() {
 	connect, err := sql.Open("clickhouse", "xxxxxxxx")
 	connect.SetMaxOpenConns(50)
 	if err != nil {
@@ -270,38 +238,58 @@ func getClick() {
 	}
 	if err := connect.Ping(); err != nil {
 		if exception, ok := err.(*clickhouse.Exception); ok {
-			fmt.Printf("[%d] %s \n%s\n", exception.Code, exception.Message, exception.StackTrace)
+			log.Info("[%d] %s \n%s\n", exception.Code, exception.Message, exception.StackTrace)
 		} else {
 			log.Error(err)
 		}
 		return
 	}
-
-	rows, err := connect.Query("SELECT country_code, os_id, browser_id, categories, action_day, action_time FROM example")
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var (
-			country               string
-			os, browser           uint8
-			categories            []int16
-			actionDay, actionTime time.Time
-		)
-		if err := rows.Scan(&country, &os, &browser, &categories, &actionDay, &actionTime); err != nil {
+	for {
+		rows, err := connect.Query("SELECT date_add, price FROM trade WHERE date_index BETWEEN NOW() - INTERVAL 5 HOUR AND NOW() AND symbol = '" + strings.ToUpper(reg.ReplaceAllString(data[0], "")) + "' ORDER BY date_add DESC LIMIT 1")
+		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("country: %s, os: %d, browser: %d, categories: %v, action_day: %s, action_time: %s", country, os, browser, categories, actionDay, actionTime)
-	}
+		defer rows.Close()
 
-	if err := rows.Err(); err != nil {
-		log.Fatal(err)
-	}
+		for rows.Next() {
+			var (
+				dateAdd  time.Time
+				floatOut float64
+			)
+			if err := rows.Scan(&dateAdd, &floatOut); err != nil {
+				log.Error(err)
+			}
 
-	if _, err := connect.Exec("DROP TABLE example"); err != nil {
-		log.Fatal(err)
-	}
+			floatUser, _ := strconv.ParseFloat(data[2], 42)
 
+			log.Info("date_add: %s, price: %d, find price: %d, symbol: %s, chat id: %s", dateAdd, floatOut, floatUser, data[0], data[3])
+
+			if data[1] == "up" {
+				if floatOut >= floatUser {
+					send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
+
+					log.Info("send")
+					return
+				}
+			} else if data[1] == "down" {
+				if floatOut <= floatUser {
+					send(data[3], "Binance notify: "+data[0]+" up to "+data[2])
+
+					log.Info("send")
+					return
+				}
+			}
+		}
+
+		if err := rows.Err(); err != nil {
+			log.Fatal(err)
+		}
+
+		time.Sleep(2 * time.Second)
+	}
 }
