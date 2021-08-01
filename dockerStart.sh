@@ -1,4 +1,4 @@
 #!/bin/bash
-docker build . -t cryptoBot-container
-docker rm -f cryptoBot-container
-docker run -d --restart=always --log-opt max-size=50m —name=cryptoBot cryptoBot-container
+docker build . -t crypto-bot-container
+docker rm -f crypto-bot-container
+docker run -d --restart=always --log-opt max-size=50m —name=cryptoBot crypto-bot-container
