@@ -9,4 +9,5 @@ FROM alpine:latest
 MAINTAINER Krol44 <krol44@me.com>
 RUN apk add tzdata
 COPY --from=builder /app/crypto-bot .
+EXPOSE 3434
 ENTRYPOINT ["./crypto-bot"]
