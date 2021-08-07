@@ -250,7 +250,7 @@ func runObserver(data []string) {
 	}
 
 	for {
-		rows, err := connect.Query("SELECT date_add, price FROM trade WHERE date_index BETWEEN NOW() - INTERVAL 10 HOUR AND NOW() AND symbol = '" + strings.ToUpper(reg.ReplaceAllString(data[0], "")) + "' ORDER BY date_add DESC LIMIT 1")
+		rows, err := connect.Query("SELECT date_add, price FROM trade WHERE date_index BETWEEN NOW() - INTERVAL 24 HOUR AND NOW() AND symbol = '" + strings.ToUpper(reg.ReplaceAllString(data[0], "")) + "' ORDER BY date_add DESC LIMIT 1")
 		if err != nil {
 			log.Fatal(err)
 		}
