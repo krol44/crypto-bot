@@ -246,6 +246,7 @@ func clearClick() {
 }
 
 type rate struct {
+	id     int32
 	couple string
 	way    string
 	price  float64
@@ -278,7 +279,7 @@ func checking() {
 	defer db.Close()
 
 	for {
-		rows, err := db.Query("SELECT couple, way, price, chat_id FROM rates")
+		rows, err := db.Query("SELECT id, couple, way, price, chat_id FROM rates")
 		if err != nil {
 			panic(err)
 		}
