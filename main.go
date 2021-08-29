@@ -271,7 +271,7 @@ func checking() {
 		log.Fatal(err)
 	}
 
-	db, err := sql.Open("sqlite3", "/home/krol44/krol44.com/crypto_bot.db")
+	db, err := sql.Open("sqlite3", "/app/crypto_bot.db")
 	if err != nil {
 		panic(err)
 	}
