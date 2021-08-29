@@ -278,7 +278,7 @@ func checking() {
 	defer db.Close()
 
 	for {
-		rows, err := db.Query("select couple, way, price, chat_id from rates")
+		rows, err := db.Query("SELECT couple, way, price, chat_id FROM rates")
 		if err != nil {
 			panic(err)
 		}
@@ -319,14 +319,14 @@ func checking() {
 						send(r.chatId, "Binance notify: "+r.couple+" up to "+fmt.Sprintf("%f", r.price))
 
 						log.Info("send")
-						return
+						db.Exec("DELETE FROM rates WHERE couple = " + r.couple + " AND way = " + r.way + " AND price = " + fmt.Sprintf("%f", r.price) + " AND chat_id = " + fmt.Sprintf("%d", r.chatId))
 					}
 				} else if r.way == "down" {
 					if floatOut <= r.price {
 						send(r.chatId, "Binance notify: "+r.couple+" up to "+fmt.Sprintf("%f", r.price))
 
 						log.Info("send")
-						return
+						db.Exec("DELETE FROM rates WHERE couple = " + r.couple + " AND way = " + r.way + " AND price = " + fmt.Sprintf("%f", r.price) + " AND chat_id = " + fmt.Sprintf("%d", r.chatId))
 					}
 				}
 			}
