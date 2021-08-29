@@ -324,7 +324,7 @@ func checking() {
 					}
 				} else if r.way == "down" {
 					if floatOut <= r.price {
-						send(r.chatId, "Binance notify: "+r.couple+" up to "+fmt.Sprintf("%f", r.price))
+						send(r.chatId, "Binance notify: "+r.couple+" down to "+fmt.Sprintf("%f", r.price))
 
 						db.Exec("DELETE FROM rates WHERE id = " + fmt.Sprintf("%d", r.id))
 						log.Info("send")
