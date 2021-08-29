@@ -288,7 +288,7 @@ func checking() {
 
 		for rows.Next() {
 			r := rate{}
-			err := rows.Scan(&r.couple, &r.way, &r.price, &r.chatId)
+			err := rows.Scan(&r.id, &r.couple, &r.way, &r.price, &r.chatId)
 			if err != nil {
 				fmt.Println(err)
 				continue
