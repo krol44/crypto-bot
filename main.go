@@ -267,10 +267,10 @@ func checking() {
 		}
 		return
 	}
-	//reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db, err := sql.Open("sqlite3", "/app/crypto_bot.db")
 	if err != nil {
@@ -298,45 +298,45 @@ func checking() {
 		}
 
 		for _, r := range rates {
-			log.Print(r.couple, r.way, r.price, r.chatId)
+			//log.Print(r.couple, r.way, r.price, r.chat_id)
 
-			//rows, err := connect.Query("SELECT date_add, price FROM trade WHERE date_index BETWEEN NOW() - INTERVAL 24 HOUR AND NOW() AND symbol = '" + strings.ToUpper(reg.ReplaceAllString(r.couple, "")) + "' ORDER BY date_add DESC LIMIT 1")
-			//if err != nil {
-			//	log.Fatal(err)
-			//}
-			//defer rows.Close()
-			//
-			//for rows.Next() {
-			//	var (
-			//		dateAdd  time.Time
-			//		floatOut float64
-			//	)
-			//	if err := rows.Scan(&dateAdd, &floatOut); err != nil {
-			//		log.Error(err)
-			//	}
-			//
-			//	log.Printf("date_add: %s, price: %f, find price: %f, symbol: %s, chat id: %d", dateAdd, floatOut, r.price, r.couple, r.chatId)
-			//
-			//	if r.way == "up" {
-			//		if floatOut >= r.price {
-			//			send(r.chatId, "Binance notify: "+r.couple+" up to "+fmt.Sprintf("%f", r.price))
-			//
-			//			db.Exec("DELETE FROM rates WHERE id = " + fmt.Sprintf("%d", r.id))
-			//			log.Info("send")
-			//		}
-			//	} else if r.way == "down" {
-			//		if floatOut <= r.price {
-			//			send(r.chatId, "Binance notify: "+r.couple+" down to "+fmt.Sprintf("%f", r.price))
-			//
-			//			db.Exec("DELETE FROM rates WHERE id = " + fmt.Sprintf("%d", r.id))
-			//			log.Info("send")
-			//		}
-			//	}
-			//}
-			//
-			//if err := rows.Err(); err != nil {
-			//	log.Fatal(err)
-			//}
+			rows, err := connect.Query("SELECT date_add, price FROM trade WHERE date_index BETWEEN NOW() - INTERVAL 24 HOUR AND NOW() AND symbol = '" + strings.ToUpper(reg.ReplaceAllString(r.couple, "")) + "' ORDER BY date_add DESC LIMIT 1")
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer rows.Close()
+
+			for rows.Next() {
+				var (
+					dateAdd  time.Time
+					floatOut float64
+				)
+				if err := rows.Scan(&dateAdd, &floatOut); err != nil {
+					log.Error(err)
+				}
+
+				log.Printf("date_add: %s, price: %f, find price: %f, symbol: %s, chat id: %d", dateAdd, floatOut, r.price, r.couple, r.chatId)
+
+				if r.way == "up" {
+					if floatOut >= r.price {
+						send(r.chatId, "Binance notify: "+r.couple+" up to "+fmt.Sprintf("%f", r.price))
+
+						db.Exec("DELETE FROM rates WHERE id = " + fmt.Sprintf("%d", r.id))
+						log.Info("send")
+					}
+				} else if r.way == "down" {
+					if floatOut <= r.price {
+						send(r.chatId, "Binance notify: "+r.couple+" down to "+fmt.Sprintf("%f", r.price))
+
+						db.Exec("DELETE FROM rates WHERE id = " + fmt.Sprintf("%d", r.id))
+						log.Info("send")
+					}
+				}
+			}
+
+			if err := rows.Err(); err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		time.Sleep(2 * time.Second)
