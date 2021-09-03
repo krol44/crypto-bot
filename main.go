@@ -82,7 +82,7 @@ func insertClick() {
 		if exception, ok := err.(*clickhouse.Exception); ok {
 			fmt.Printf("[%d] %s \n%s\n", exception.Code, exception.Message, exception.StackTrace)
 		} else {
-			log.Error(err)
+			panic(err)
 		}
 		return
 	}
