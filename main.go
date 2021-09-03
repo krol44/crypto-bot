@@ -267,10 +267,10 @@ func checking() {
 		}
 		return
 	}
-	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-	if err != nil {
-		log.Fatal(err)
-	}
+	//reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 	db, err := sql.Open("sqlite3", "/app/crypto_bot.db")
 	if err != nil {
