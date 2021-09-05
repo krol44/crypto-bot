@@ -159,7 +159,7 @@ func main() {
 
 	go func() {
 		log.Info("ListenAndServe start")
-		log.Println(http.ListenAndServe("localhost:6060", nil))
+		log.Println(http.ListenAndServe(":6060", nil))
 	}()
 
 	go func() {
