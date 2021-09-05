@@ -158,6 +158,7 @@ func main() {
 	utils.Test()
 
 	go func() {
+		log.Info("ListenAndServe start")
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 
