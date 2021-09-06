@@ -242,7 +242,7 @@ func clearClick() {
 			return
 		}
 
-		connect.Exec("ALTER TABLE trade DELETE WHERE date_index BETWEEN '2021-01-01' AND NOW() - INTERVAL 4 DAY")
+		connect.Exec("ALTER TABLE trade DELETE WHERE date_index BETWEEN '2021-01-01' AND NOW() - INTERVAL 1 DAY")
 		connect.Close()
 
 		log.Info("Cleaning clickhouse...")
@@ -278,7 +278,7 @@ func checking() {
 		log.Fatal(err)
 	}
 
-	db, err := sql.Open("sqlite3", "/app/crypto_bot.db")
+	db, err := sql.Open("sqlite3", "./crypto_bot.db")
 	if err != nil {
 		panic(err)
 	}
@@ -345,7 +345,7 @@ func checking() {
 			}
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 
