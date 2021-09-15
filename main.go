@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
+	_ "modernc.org/sqlite"
 	"net/http"
 	"os"
 	"path"
@@ -15,9 +17,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	_ "github.com/mattn/go-sqlite3"
-	log "github.com/sirupsen/logrus"
 	//_ "net/http/pprof"
 )
 
@@ -281,7 +280,7 @@ var dataFromJson ResultJson
 
 func getNewRates() {
 	for {
-		db, err := sql.Open("sqlite3", "./crypto_bot.db")
+		db, err := sql.Open("sqlite", "./crypto_bot.db")
 		if err != nil {
 			panic(err)
 		}
@@ -321,7 +320,7 @@ func removeRate(r rate, dataRates []rate) []rate {
 }
 
 func checkingV2() {
-	db, err := sql.Open("sqlite3", "./crypto_bot.db")
+	db, err := sql.Open("sqlite", "./crypto_bot.db")
 	if err != nil {
 		panic(err)
 	}
@@ -380,7 +379,7 @@ func checking() {
 		log.Fatal(err)
 	}
 
-	db, err := sql.Open("sqlite3", "./crypto_bot.db")
+	db, err := sql.Open("sqlite", "./crypto_bot.db")
 	if err != nil {
 		panic(err)
 	}
