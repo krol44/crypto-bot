@@ -260,7 +260,7 @@ type rate struct {
 	chatId int32
 }
 
-var dataRates = []rate{}
+var dataRates []rate
 
 type ResultJson struct {
 	Type          string `json:"e"`
@@ -279,20 +279,19 @@ type ResultJson struct {
 var dataFromJson ResultJson
 
 func getNewRates() {
-	for {
-		db, err := sql.Open("sqlite", "./crypto_bot.db")
-		if err != nil {
-			panic(err)
-		}
-		defer db.Close()
+	db, err := sql.Open("sqlite", "./crypto_bot.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
+	for {
 		rows, err := db.Query("SELECT id, couple, way, price, chat_id FROM rates")
 		if err != nil {
 			panic(err)
 		}
-		defer rows.Close()
 
-		rates := []rate{}
+		var rates []rate
 
 		for rows.Next() {
 			r := rate{}
